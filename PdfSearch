@@ -1,5 +1,5 @@
 import os
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from PyPDF2 import PdfReader
 from googletrans import Translator
 import re
@@ -100,33 +100,33 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
     try:
         # Use multiprocessing for faster processing
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
-            for pdf_path, pdf_results in zip(remaining_files, executor.map(process_pdf, remaining_files)):
-                all_results.extend(pdf_results)
-                processed_files.add(os.path.basename(pdf_path))
-                progress["processed_files"] = list(processed_files)
-                save_progress(progress)
+            futures = {executor.submit(process_pdf, pdf_path): pdf_path for pdf_path in remaining_files}
+            for future in as_completed(futures):
+                pdf_path = futures[future]
+                try:
+                    pdf_results = future.result()
+                    all_results.extend(pdf_results)
 
-        # Convert results to a Polars DataFrame
-        if all_results:
-            new_df = pl.DataFrame(all_results)
-            if os.path.exists(output_file):
-                # Append to the existing dataset
-                existing_df = pl.read_excel(output_file)
-                new_df = pl.concat([existing_df, new_df], how="vertical").unique()
-            new_df.write_excel(output_file)
+                    # Update progress and save incrementally
+                    processed_files.add(os.path.basename(pdf_path))
+                    progress["processed_files"] = list(processed_files)
+                    save_progress(progress)
+
+                    # Save results incrementally
+                    if pdf_results:
+                        new_df = pl.DataFrame(pdf_results)
+                        if os.path.exists(output_file):
+                            existing_df = pl.read_excel(output_file)
+                            new_df = pl.concat([existing_df, new_df], how="vertical").unique()
+                        new_df.write_excel(output_file)
+                except Exception as e:
+                    print(f"Error processing {pdf_path}: {e}")
 
         print(f"Results saved to {output_file}")
     except KeyboardInterrupt:
         print("\nInterrupted! Saving progress...")
-        if all_results:
-            # Save partial results to the file
-            partial_df = pl.DataFrame(all_results)
-            if os.path.exists(output_file):
-                existing_df = pl.read_excel(output_file)
-                partial_df = pl.concat([existing_df, partial_df], how="vertical").unique()
-            partial_df.write_excel(output_file)
         save_progress(progress)
-        print(f"Progress saved. You can resume the process later.")
+        print("Progress saved. You can resume the process later.")
         exit()
 
 # Main function
