@@ -46,9 +46,8 @@ def process_pdf(pdf_path):
         detected_language = match.group(1)
 
         # Validate the detected language
-        if detected_language not in ["en", "fr", "ar", "ru", "zh"]:
-            print(f"Unsupported language {detected_language} in {pdf_name}, skipping.")
-            return results
+        if detected_language not in ["en", "fr", "es", "ar", "ru", "zh"]:
+            print(f"Suspicious Unsupported language {detected_language} in {pdf_name}, check out later.")
 
         for page_number, page in enumerate(reader.pages, start=1):
             text = page.extract_text()
