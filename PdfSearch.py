@@ -80,7 +80,7 @@ def process_pdf(pdf_path):
                     })
     except Exception as e:
         print(f"Error processing {pdf_path}: {e}")
-        return []
+        return None
 
     print(f"Processed {pdf_name}")
     return results
@@ -95,8 +95,6 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
     processed_files = set(progress["processed_files"])
     remaining_files = [f for f in pdf_files if os.path.basename(f) not in processed_files]
 
-    all_results = []
-
     try:
         # Use multiprocessing for faster processing
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
@@ -105,20 +103,23 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
                 pdf_path = futures[future]
                 try:
                     pdf_results = future.result()
-                    all_results.extend(pdf_results)
 
-                    # Update progress and save incrementally
-                    processed_files.add(os.path.basename(pdf_path))
-                    progress["processed_files"] = list(processed_files)
-                    save_progress(progress)
-
-                    # Save results incrementally
-                    if pdf_results:
+                    if pdf_results!=None:
+                        # Read the existing Excel file safely
+                        existing_df = safe_read_excel(output_file)
                         new_df = pl.DataFrame(pdf_results)
-                        if os.path.exists(output_file):
-                            existing_df = pl.read_excel(output_file)
-                            new_df = pl.concat([existing_df, new_df], how="vertical").unique()
-                        new_df.write_excel(output_file)
+
+                        # Append new results to the existing file
+                        combined_df = pl.concat([existing_df, new_df], how="vertical").unique()
+
+                        # Write back to the Excel file
+                        combined_df.write_excel(output_file)
+
+                        # Mark the file as processed only after results are saved
+                        processed_files.add(os.path.basename(pdf_path))
+                        progress["processed_files"] = list(processed_files)
+                        save_progress(progress)
+
                 except Exception as e:
                     print(f"Error processing {pdf_path}: {e}")
 
@@ -128,6 +129,18 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
         save_progress(progress)
         print("Progress saved. You can resume the process later.")
         exit()
+
+def safe_read_excel(file_path):
+    """
+    Safely read an Excel file using Polars.
+    If the file is corrupt or unreadable, return an empty DataFrame.
+    """
+    try:
+        return pl.read_excel(file_path, raise_if_empty=False)
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
+        print("Creating a new file instead.")
+        return pl.DataFrame([])
 
 # Main function
 def main():
