@@ -10,7 +10,7 @@ import json
 KEYWORDS = ["fertility", "economic participation", "labour participation", "labor participation"]
 
 pdf_folder = "downloaded_pdfs"  # Folder containing the PDFs
-output_file = "kwic_results.xlsx"  # Output CSV file
+output_file = "kwic_results.xlsx"  # Output Excel file
 
 # Progress file to keep track of processed PDFs
 PROGRESS_FILE = "progress.json"
@@ -97,24 +97,37 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
 
     all_results = []
 
-    # Use multiprocessing for faster processing
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        for pdf_path, pdf_results in zip(remaining_files, executor.map(process_pdf, remaining_files)):
-            all_results.extend(pdf_results)
-            processed_files.add(os.path.basename(pdf_path))
-            progress["processed_files"] = list(processed_files)
-            save_progress(progress)
+    try:
+        # Use multiprocessing for faster processing
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            for pdf_path, pdf_results in zip(remaining_files, executor.map(process_pdf, remaining_files)):
+                all_results.extend(pdf_results)
+                processed_files.add(os.path.basename(pdf_path))
+                progress["processed_files"] = list(processed_files)
+                save_progress(progress)
 
-    # Convert results to a Polars DataFrame
-    if all_results:
-        df = pl.DataFrame(all_results)
-        if os.path.exists(output_file):
-            # Append to the existing dataset
-            existing_df = pl.read_csv(output_file)
-            df = pl.concat([existing_df, df], how="vertical")
-        df.write_excel(output_file)
+        # Convert results to a Polars DataFrame
+        if all_results:
+            new_df = pl.DataFrame(all_results)
+            if os.path.exists(output_file):
+                # Append to the existing dataset
+                existing_df = pl.read_excel(output_file)
+                new_df = pl.concat([existing_df, new_df], how="vertical").unique()
+            new_df.write_excel(output_file)
 
-    print(f"Results saved to {output_file}")
+        print(f"Results saved to {output_file}")
+    except KeyboardInterrupt:
+        print("\nInterrupted! Saving progress...")
+        if all_results:
+            # Save partial results to the file
+            partial_df = pl.DataFrame(all_results)
+            if os.path.exists(output_file):
+                existing_df = pl.read_excel(output_file)
+                partial_df = pl.concat([existing_df, partial_df], how="vertical").unique()
+            partial_df.write_excel(output_file)
+        save_progress(progress)
+        print(f"Progress saved. You can resume the process later.")
+        exit()
 
 # Main function
 def main():
