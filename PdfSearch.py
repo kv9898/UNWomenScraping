@@ -103,18 +103,19 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
                 try:
                     pdf_results = future.result()
 
-                    if pdf_results!=None:
-                        # Read the existing Excel file safely
-                        existing_df = safe_read_excel(output_file)
-                        new_df = pl.DataFrame(pdf_results)
+                    if pdf_results is not None:  # Skip if None
+                        if pdf_results:  # Process non-empty results
+                            # Read the existing Excel file safely
+                            existing_df = safe_read_excel(output_file)
+                            new_df = pl.DataFrame(pdf_results)
 
-                        # Append new results to the existing file
-                        combined_df = pl.concat([existing_df, new_df], how="vertical").unique()
+                            # Append new results to the existing file
+                            combined_df = pl.concat([existing_df, new_df], how="vertical").unique()
 
-                        # Write back to the Excel file
-                        combined_df.write_excel(output_file)
+                            # Write back to the Excel file
+                            combined_df.write_excel(output_file)
 
-                        # Mark the file as processed only after results are saved
+                        # Mark the file as processed regardless of results
                         processed_files.add(os.path.basename(pdf_path))
                         progress["processed_files"] = list(processed_files)
                         save_progress(progress)
