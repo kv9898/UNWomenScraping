@@ -54,10 +54,15 @@ def process_pdf(pdf_path):
             if not text.strip():
                 continue  # Skip empty pages
 
-            if detected_language != "en":
-                translated_text = translator.translate(text, src=detected_language, dest="en").text
-            else:
-                translated_text = text
+            try:
+                if detected_language != "en":
+                    detected_language = "zh-CN" if detected_language == "zh"
+                    translated_text = translator.translate(text, src=detected_language, dest="en").text
+                else:
+                    translated_text = text
+            except Exception as e:
+                print(f"Translation failed for {pdf_name}, page {page_number}: {e}")
+                translated_text = ""
 
             # Search for keywords in the translated text
             for keyword in KEYWORDS:
