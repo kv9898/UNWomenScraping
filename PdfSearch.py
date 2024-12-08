@@ -49,7 +49,7 @@ def process_pdf(pdf_path):
         match = re.search(r'_([a-z]{2})(?:_\d+)?\.pdf$', pdf_name)
         if not match:
             print(f"Could not extract language from {pdf_name}, skipping.")
-            return results
+            return None
         detected_language = match.group(1)
 
         # temporarily disable non-english translation
