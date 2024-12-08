@@ -56,7 +56,7 @@ def process_pdf(pdf_path):
 
             try:
                 if detected_language != "en":
-                    detected_language = "zh-CN" if detected_language == "zh"
+                    detected_language = "zh-CN"if detected_language == "zh" else detected_language
                     translated_text = translator.translate(text, src=detected_language, dest="en").text
                 else:
                     translated_text = text
@@ -114,7 +114,7 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
                             existing_df = safe_read_excel(output_file)
                             new_df = pl.DataFrame(pdf_results)
 
-                            # Append new results to the existing file
+                            # Append new results
                             combined_df = pl.concat([existing_df, new_df], how="vertical").unique()
 
                             # Write back to the Excel file
