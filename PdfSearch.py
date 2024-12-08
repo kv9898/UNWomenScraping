@@ -52,6 +52,11 @@ def process_pdf(pdf_path):
             return results
         detected_language = match.group(1)
 
+        # temporarily disable non-english translation
+        if detected_language != "en":
+            print(f"Skipping {pdf_name} due to non-English language ({detected_language})")
+            return None
+
         for page_number, page in enumerate(reader.pages, start=1):
             if STOP_SIGNAL:  # Check for termination request
                 return results
@@ -127,8 +132,8 @@ def process_all_pdfs(pdf_folder, output_file, num_workers=4):
 
                         # Mark file as processed and save progress
                         processed_files.add(pdf_name)
-                        progress["processed_files"] = list(processed_files)
-                        save_progress(progress)
+                    progress["processed_files"] = list(processed_files)
+                    save_progress(progress)
 
                 except Exception as e:
                     print(f"Error processing {pdf_path}: {e}")
