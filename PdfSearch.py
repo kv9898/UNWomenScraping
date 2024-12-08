@@ -2,7 +2,7 @@ import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from PyPDF2 import PdfReader
-from googletrans import Translator
+from trans import trans
 import re
 import polars as pl
 import json
@@ -15,7 +15,6 @@ pdf_folder = "downloaded_pdfs"  # Folder containing the PDFs
 output_file = "kwic_results.xlsx"  # Output Excel file
 PROGRESS_FILE = "progress.json"  # Progress file to keep track of processed PDFs
 
-translator = Translator()  # Initialize translator
 STOP_SIGNAL = False  # Global variable to track Ctrl+C
 
 # Signal handler for Ctrl+C
@@ -67,8 +66,8 @@ def process_pdf(pdf_path):
 
             try:
                 if detected_language != "en":
-                    detected_language = "zh-CN" if detected_language == "zh" else detected_language
-                    translated_text = translator.translate(text, src=detected_language, dest="en").text
+                    # detected_language = "zh-CN" if detected_language == "zh" else detected_language
+                    translated_text = trans(text, detected_language)
                 else:
                     translated_text = text
             except Exception as e:
