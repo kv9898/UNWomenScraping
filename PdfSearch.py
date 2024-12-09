@@ -52,10 +52,10 @@ def process_pdf(pdf_path):
             return None
         detected_language = match.group(1)
 
-        # temporarily disable non-english translation
-        if detected_language != "en":
-            print(f"Skipping {pdf_name} due to non-English language ({detected_language})")
-            return None
+        # uncomment to disable non-english translation
+        # if detected_language != "en":
+        #     print(f"Skipping {pdf_name} due to non-English language ({detected_language})")
+        #     return None
 
         for page_number, page in enumerate(reader.pages, start=1):
             if STOP_SIGNAL:  # Check for termination request
