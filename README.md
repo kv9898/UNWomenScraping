@@ -14,6 +14,13 @@ This is a script I written for my own personal use and I would like to share it 
 1. The parsing of non-English documents can be disabled by uncommenting lines 56-58 in `PdfSearch.py`.
 2. The default translation engine is `google`. But this is subject to usage limits. An alternative is `mymemory`, but it is much slower. `libre` is not usable at the time of writing. Local models are not recommended due to the size of the documents and the complexity involved in running the models with multiprocessing.
 
-# Versions
+# Versions and dependencies
+It is recommended that the [UV](https://docs.astral.sh/uv/) project manager is used for this project.
+
+## For UV users
+
+a simple `uv sync` would suffice to replicate the Python environment needed for this project.
+
+## For non-UV users
 
 Python 3.12.4 is used, the versions of the other dependencies are listed in the `requirements.txt` file.
