@@ -1,0 +1,6 @@
+beautifulsoup4==4.12.3
+googletrans==4.0.0rc1
+polars==1.17.1
+PyPDF2==3.0.1
+Requests==2.32.3
+translate==3.6.1
