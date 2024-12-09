@@ -1,4 +1,5 @@
 *.pdf
+/.venv
 /downloaded_pdfs
 progress.json
 kwic_results.xlsx
