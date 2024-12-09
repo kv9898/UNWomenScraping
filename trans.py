@@ -62,3 +62,6 @@ match DEFAULT_ENGINE:
     #         return translators[from_lang](text)[0]['translation_text']
     case _:
         raise ValueError(f"Unsupported engine: {DEFAULT_ENGINE}")
+
+if __name__ == "__main__": # for testing
+    print(trans("你好", "zh"))
