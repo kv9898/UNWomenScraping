@@ -1,5 +1,5 @@
-# DEFAULT_ENGINE = "google" # alternatively, "mymemory", "LibreTranslate"
-DEFAULT_ENGINE = "LibreTranslate"
+DEFAULT_ENGINE = "google" # alternatively, "mymemory", "libre"
+
 
 match DEFAULT_ENGINE:
     case "google":
@@ -19,7 +19,7 @@ match DEFAULT_ENGINE:
             from_lang = "zh-CN" if from_lang == "zh" else from_lang
             translated_text = translator.translate(text, src=from_lang, dest="en").text
             return translated_text
-    case "mymemory" | "LibreTranslate":
+    case "mymemory" | "libre":
         from translate import Translator
         # create a dictionary of translators
         translators = {
