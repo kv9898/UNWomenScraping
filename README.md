@@ -23,4 +23,4 @@ a simple `uv sync` would suffice to replicate the Python environment needed for 
 
 ## For non-UV users
 
-Python 3.12.4 is used, the versions of the other dependencies are listed in the `requirements.txt` file.
+Python 3.12.8 is used, the versions of the other dependencies are listed in the `requirements.txt` file.

@@ -1,15 +1,17 @@
 [project]
 name = "unwomenscraping"
-version = "0.1.0"
+version = "0.1.1"
 description = "Scrape, parse and analyse UN Women reports"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = "<3.13, >=3.9"
 dependencies = [
     "beautifulsoup4>=4.12.3",
+    "fastexcel>=0.12.0",
     "googletrans==4.0.0rc1",
     "ipykernel>=6.29.5",
     "polars>=1.17.1",
-    "pypdf2>=3.0.1",
+    "pypdf>=5.1.0",
     "requests>=2.32.3",
     "translate>=3.6.1",
+    "xlsxwriter",
 ]

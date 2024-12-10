@@ -1,7 +1,8 @@
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from PyPDF2 import PdfReader
+# from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from trans import trans
 import re
 import polars as pl
